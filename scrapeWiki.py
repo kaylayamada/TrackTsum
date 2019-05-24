@@ -44,6 +44,7 @@ for row in table.find_all('tr'):
         description = columns[6].text
         tsums.append(tsum(titleName, imageurl, series, numToCharge, description))
         #tsums.append([titleName, image, series, numToCharge, description])
+
 #for tsum in tsums:
 #    print(tsum.name)
 #    print(tsum.imageurl)

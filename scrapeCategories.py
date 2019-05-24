@@ -36,31 +36,36 @@ def tsumExists(tsumName):
 for row in table.find_all('tr'):
     details = row.find_all("a")
     if len(details)>0:
-        titleName = details[1].text
+        tsumName = details[1].text
+        if "Musketeer" in tsumName:
+            tsumName = "Musketeer "+tsumName[17:]
+        elif "Panchito" in tsumName:
+            tsumName = "Panchito Pistoles"
+        elif "Jamba" in tsumName:
+            tsumName = "Dr. Jumba Jookiba"
+        elif "Frankenstein" in tsumName:
+            tsumName = "Bolt-head Goofy"
+        elif "Boogie" in tsumName:
+            tsumName = "Oogie Boogie"
+        elif "Santa Jack" in tsumName:
+            tsumName = "Holiday Jack"
         imageurl = details[0].get('href')
         series = details[2].text
         columns = row.find_all('td')
         numToCharge = columns[4].text
         description = columns[6].text
         #tsums.append(tsum(titleName, imageurl, series, numToCharge, description))
-        tsums[titleName] = tsum(titleName, imageurl, series, numToCharge, description)
+        tsums[tsumName] = tsum(tsumName, imageurl, series, numToCharge, description)
 
-# Tsum tsums missed
-tsums["Dr. Jumba Jookiba"] = tsum("Dr. Jumba Jookiba", "https://vignette.wikia.nocookie.net/disneytsumtsum/images/8/84/Dr.Jamba.png/revision/latest?cb=20180901000816",\
-    "Lilo & Stitch", 16, "Clears a zig-zag of Tsums!")
 
 #for tsum in tsums:
 #    tsumNames.append(tsum.name)
 tsumNames = list(tsums)
-#print(tsumNames)
-
 
 
 # Get links to category attributes
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-url = 'https://disneytsumtsum.fandom.com/wiki/Category:Attributes'
-page = urlopen(url)
+atturl = 'https://disneytsumtsum.fandom.com/wiki/Category:Attributes'
+page = urlopen(atturl)
 soup = BeautifulSoup(page, 'lxml')
 list = soup.find("div", {"class":"category-page__members"})
 pages = list.find_all("a")
@@ -82,31 +87,39 @@ for link in links:
         names = list.find_all("figcaption")
         CategoryNames = [name.text for name in names] #Tsum tsum in that Category
         # check if exists as tsum tsums
-        count = 0
-        #TODO: Make dictionary of tsumtsum names from a better list
-
         for tsumName in CategoryNames:
             if tsumName in tsums:
                 tempTsum = tsums[tsumName]
                 tempTsum.categories.append(CategoryTitle)
-                count = count + 1
-            elif "Musketeer" in tsumName:
-                tsums["Three Musketeers "+tsumName[10:]].categories.append(CategoryTitle)
-                count = count + 1
-            elif "Panchito" in tsumName:
-                tsums["Panchito"].categories.append(CategoryTitle)
-                count = count + 1
-            elif "Bolt" in tsumName:
-                tsums["Frankenstein Goofy"].categories.append(CategoryTitle)
-                count = count + 1
-            elif "Boogie" in tsumName:
-                tsums["Boogie"].categories.append(CategoryTitle)
-                count = count + 1
             else:
                 raise Exception("Tsum tsum not in database: "+tsumName)
         #print(CategoryTitle)
         #print(CategoryNames)
         #print(count == len(CategoryNames))
+
+#SKILLS
+skillurl = 'https://disneytsumtsum.fandom.com/wiki/Category:Skills'
+page = urlopen(skillurl)
+soup = BeautifulSoup(page, 'lxml')
+list = soup.find("div", {"class":"category-page__members"})
+pages = list.find_all("a")
+skillLinks = ["https://disneytsumtsum.fandom.com"+page.get('href') for page in pages]
+for link in skillLinks:
+    page = urlopen(link)
+    soup = BeautifulSoup(page, 'lxml')
+    title = soup.find('h1', {"class":"page-header__title"})
+    CategoryTitle = title.text
+    list = soup.find("ul", {"class":"category-page__trending-pages"})
+    names = list.find_all("figcaption")
+    CategoryNames = [name.text for name in names] #Tsum tsum in that Category
+    # check if exists as tsum tsums
+    for tsumName in CategoryNames:
+        if tsumName in tsums:
+            tempTsum = tsums[tsumName]
+            tempTsum.categories.append(CategoryTitle)
+        else:
+            raise Exception("Tsum tsum not in database: "+tsumName)
+
 
 for tsum in tsums:
     print(tsums[tsum].name)
